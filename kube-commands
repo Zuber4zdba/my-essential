@@ -1,0 +1,933 @@
+Pod.yml
+kind: Pod
+apiVersion: v1
+metadata:
+  name: testpod
+spec:
+  containers:
+    - name: c00
+      image: ubuntu
+      command: ["/bin/bash", "-c", "while true; do echo Hello; sleep 5 ; done"]
+    - name: c01
+      image: httpd
+      ports:
+       - containerPort: 80
+
+:wq!
+
+Service.yml
+kind: Service  # Defines to create Service type Object
+apiVersion: v1
+metadata:
+  name: demoservice
+spec:
+  ports:
+    - port: 80  # Containers port exposed
+      targetPort: 80 # Pods port
+  selector:
+    name: deployment # Apply this service to any pods which has the specific label
+  type: ClusterIP  # Specifies the service type
+ i.e ClusterIP or NodePort
+
+Deploy.yml
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+   name: mydeployments
+spec:
+   replicas: 1
+   selector:  # tells the rs which pods to watch/belong to
+    matchLabels:
+     name: deployment
+   template:
+     metadata:
+       name: testpod1
+       labels:
+         name: deployment
+     spec:
+      containers:
+        - name: c00
+          image: httpd
+          ports:
+          - containerPort: 80
+
+:wq!
+Deployment.yml
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+   name: mydeployments
+spec:
+   replicas: 2
+   selector:     
+    matchLabels:
+     name: deployment
+   template:
+     metadata:
+       name: testpod
+       labels:
+         name: deployment
+     spec:
+      containers:
+        - name: c00
+          image: ubuntu
+          command: ["/bin/bash", "-c", "while true; do echo GM; sleep 5; done"]
+
+:wq!
+
+Samplepod.yml
+kind: Pod                              
+apiVersion: v1                     
+metadata:                           
+  name: testpod                  
+spec:                                    
+  containers:                      
+    - name: c00                     
+      image: ubuntu              
+      command: ["/bin/bash", "-c", "while true; do echo PRINT; sleep 5 ; done"]
+  restartPolicy: Never # Defaults to Always
+:wq!
+POD WITH PORTS.yml
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: testpod4
+spec:
+  containers:
+    - name: c00
+      image: httpd
+      ports:
+       - containerPort: 80
+:wq!
+Multiconpod.yml 
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: testpod3
+spec:
+  containers:
+    - name: c00
+      image: ubuntu
+      command: ["/bin/bash", "-c", "while true; do echo PRINT1; sleep 5 ; done"]
+    - name: c01
+      image: ubuntu
+      command: ["/bin/bash", "-c", "while true; do echo PRINT; sleep 5 ; done"]
+
+:wq!
+
+PODENVIRONMENT VARIABLES.yml
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: environments
+spec:
+  containers:
+    - name: c00
+      image: ubuntu
+      command: ["/bin/bash", "-c", "while true; do echo zuber; sleep 5 ; done"]
+      env: # List of environment variables to be used inside the pod
+      - name: MYNAME
+        value: BHUPINDER
+
+:wq!
+
+PERSISTENT VOLUME
+
+Pv.yml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: myebsvol
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  awsElasticBlockStore:
+    volumeID:           # YAHAN APNI EBS VOLUME ID DAALO
+    fsType: ext4
+
+:wq!
+
+Pvc.yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myebsvolclaim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+:wq!
+
+secret vol pod.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myvolsecret
+spec:
+  containers:
+  - name: c1
+    image: centos
+    command: ["/bin/bash", "-c", "while true; do echo Technical-guftgu; sleep 5 ; done"]
+    volumeMounts:
+      - name: testsecret
+        mountPath: "/tmp/mysecrets"   # the secret files will be mounted as ReadOnly by default here
+  volumes:
+  - name: testsecret
+    secret:
+       secretName: mysecret
+
+---------------->>>>>>>>------commands
+
+echo "root" > username.txt;
+echo "password" > password.txt
+
+kubectl create secret generic mysecret  --from-file=username.txt  --from-file=password.txt
+
+---------------->>>>>>>>>>>-------commads
+
+resource quota.yml 
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+   name: myquota
+spec:
+  hard:
+    limits.cpu: "400m"
+    limits.memory: "400Mi"
+    requests.cpu: "200m"
+    requests.memory: "200Mi"
+:wq!
+
+Deployment in resource quota.yml 
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: deployments
+spec:
+  replicas: 3
+  selector:      
+    matchLabels:
+     objtype: deployment
+  template:
+    metadata:
+      name: testpod8
+      labels:
+        objtype: deployment
+    spec:
+     containers:
+       - name: c00
+         image: ubuntu
+         command: ["/bin/bash", "-c", "while true; do echo Technical-Guftgu; sleep 5 ; done"]
+         resources:
+            requests:
+              cpu: "200m"
+
+:wq!
+
+Limitrange.yml
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-limit-range
+spec:
+  limits:
+  - default:
+      cpu: 1
+    defaultRequest:
+      cpu: 0.5
+    type: Container
+:wq!
+
+Limit pod cpu.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: default-cpu-demo-2
+spec:
+  containers:
+  - name: default-cpu-demo-2-ctr
+    image: nginx
+    resources:
+      limits:
+        cpu: "1"
+
+:wq!
+Limit pod.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: default-cpu-demo-3
+spec:
+  containers:
+  - name: default-cpu-demo-3-ctr
+    image: nginx
+    resources:
+      requests:
+        cpu: "0.75"
+:wq!
+kind: Deployment
+deployment in limit.yml
+
+apiVersion: apps/v1
+metadata:
+   name: mydeploy
+spec:
+   replicas: 1
+   selector:
+    matchLabels:
+     name: deployment
+   template:
+     metadata:
+       name: testpod8
+       labels:
+         name: deployment
+     spec:
+      containers:
+        - name: c00
+          image: httpd
+          ports:
+          - containerPort: 80
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
+:wq!
+----------
+$ kubectl autoscale deployment mydeploy --cpu-percent=20 --min=1 --max=10
+----------
+Cron job pod container.yml
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+ name: backup
+spec:
+ schedule: "* * * * *"
+ jobTemplate:
+   spec:
+     template:
+       spec:
+         containers:
+         - image: ubuntu
+           name: backupc1
+           command: ["/bin/bash", "-c", "echo PRINT; sleep 5"]
+         restartPolicy: Never
+
+:wq!
+
+HEALTHCHECK/LIVENESSPROBE.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: mylivenessprobe
+spec:
+  containers:
+  - name: liveness
+    image: ubuntu
+    args:
+    - /bin/sh
+    - -c
+    - touch /tmp/healthy; sleep 1000
+    livenessProbe: # define the health check
+      exec:
+        command: # command to run periodically
+        - cat                
+        - /tmp/healthy
+      initialDelaySeconds: 5  # Wait for the specified time before it runs the first probe
+      periodSeconds: 5 # Run the above command every 5 sec
+      timeoutSeconds: 30                              
+
+:wq!
+
+Pod treble shooting commands.
+
+>Kubectl describe pods $(pod1).
+
+>kubectl apply --validate -f mypod.yaml.
+
+>Kubectl get pods.
+
+>Kubectl get pods –o wide.
+
+>kubectl get events.
+
+>kubectl get events - -namespace=myns.
+
+>Kubectl logs –f pod1.
+
+>Kubectl logs –f pod1 –c c1.
+
+>kubectl logs ${pod} ${container}.
+
+>kubectl logs previous ${pod} ${cont}
+
+>kubectl exec -it pod1 - - sh.
+
+>Kubectl label pods pod1 env=dev.
+
+>Kubectl get pods –l env=dev.
+
+>Kubectl delete pods –l env=dev.
+
+>Kubectl delete pods pod1.
+
+>Kubectl get pods –l ‘env in (dev,prod)’.
+
+>Kubectl get pods –show-labels.
+
+>Kubectl get nodes –show-labels.
+
+>Kubectl get ns.
+
+>Kubectl get ns –o wide.
+
+>kubectl describe rc ${RC_name}.
+
+>kubectl get endpoints ${SERVICE_NAME}.
+
+>kubectl config view | grep ns.
+
+>Kubectl config set-context $( kubectl config current-context) –namespace=ns_name.
+
+>Kubectl create configmap my_config –from-file=file1.txt.
+
+>Kubectl create secret generic my_secret --from-file=my_file1.txt --from-file=my_file2.txt.
+
+>Kubectl exec pod1 –c –hostname –i.
+
+>Kubectl describe node <ip……>.
+
+>Kubectl delete –f pod1.yml.
+
+>Kubectl exec pod1 –it –c --/bin/bash.
+
+>minikube status.
+
+>Curl <pod_ip>:8080.
+
+>Kubectl describe pod nodelabels.
+
+>Kubectl label nodes <ip> com=tcs.
+
+<<copy pod using debug and change container image>>
+
+>kubectl run pod1 --image=ubuntu --restart=Never -- sleep 1d.
+
+>kubectl debug pod1 -it --image=centos --share-processes --copy-to=pod2.
+
+>Kubectl delete pods pod1 pod2.
+
+>kubectl run - -image=ubuntu p1 --false.
+
+>kubectl debug pod1 -it --copy-to=pod2 --container=c1 – sh.
+
+# kgp –A | grep pending
+
+# kgno
+
+(kube-system <namespace hai>)
+
+# kdelp <cloud-controller-manager-w4hm4> -n kube-system
+
+# kgp –l node-role.kubernetes.io/control-plane
+
+$ kgp –n varabhi-nfr-prod
+
+$ kdp –n prod-varadhi <varadhi-producer-api-7bfbff97f-w8gm4> | grep –i image 
+
+$ kgp –n kube-system | grep cloud
+
+$ kdp <pod-name> -n kube-system | 
+
+# kgp –l  -n kube-system
+
+# kgno –l node-role.kubernetes.io/control-plane=
+
+# kgp –A | grep cloud-controller-manger
+
+# kgp –l node-role.kubernetes.io/control-plane –n kube-system
+$ kgp –n fk-kevlor-registry-rest- Playground
+
+$ k get svc –n fk-kevlor-registry-rest- Playground
+
+# k describe svc –n <kf-kevlor-registry- Playground> (its namespace)
+
+# kdelp <griffin….pname> -n <griffin-ns>
+
+# kgp –n kube-system –owide | cloud-controller-manager
+
+# connection to <ip> closed by remote host
+
+# less ansible/group_vars/all.yml
+
+# grop –rl almdev_users ansible/
+
+# k get svc –n monitoring
+
+# kgp –n kube-system –owide | grep cloud-contreller-manager
+
+# kgp –A –owide | grep <sparrow…name>
+
+# kgno –owide <sparrow-….name>
+
+# kgp –A –owide | grep <sparrow-..name> | wc
+
+# ls –lth /var/log/kfruntimeservice-vm-agent/publisher.log*
+
+$ last
+$ df –h /
+$ du –sh /var/log/pods/
+$ emptyDirVolume.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myvolemptydir
+spec:
+  containers:
+  - name: c1
+    image: centos
+    command: ["/bin/bash", "-c", "sleep 15000"]
+
+    volumeMounts:  # Mount definition inside the container
+      - name: xchange
+        mountPath: "/tmp/xchange"          
+  - name: c2
+    image: centos
+    command: ["/bin/bash", "-c", "sleep 10000"]
+    volumeMounts:
+      - name: xchange
+        mountPath: "/tmp/data"
+  volumes:                                                   
+  - name: xchange
+    emptyDir: {}
+:wq!
+
+Hostpathvolume.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myvolhostpath
+spec:
+  containers:
+  - image: centos
+    name: testc
+    command: ["/bin/bash", "-c", "sleep 15000"]
+    volumeMounts:
+    - mountPath: /tmp/hostpath
+      name: testvolume
+  volumes:
+  - name: testvolume
+    hostPath:
+      path: /tmp/data
+
+:wq!
+
+Configuring 1 master and 2 worker node kubernetes
+
+sudo su
+
+apt-get update
+
+apt-get install apt-transport-https
+
+
+apt install docker.io -y
+
+docker --version
+
+systemctl start docker
+
+systemctl enable docker
+
+sudo curl -s https://packages.cloud.google.com/apt/doc/apt.keygpg | 
+
+sudo apt-key add 
+
+nano /etc/apt/sources.list.d/kubernetes.list
+
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+
+apt-get update
+
+apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+
+BOOTSTRAPPING THE MASTER NODE (IN MASTER)
+
+kubeadm init
+ 
+COPY THE COMMAND TO RUN IN NODES & SAVE IN NOTEPAD
+
+mkdir -p $HOME/.kube
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-rbac.yml
+CONFIGURE WORKER NODES (IN NODES)
+
+COPY LONG CODE PROVIDED MY MASTER IN NODE NOW LIKE CODE GIVEN BELOW
+
+e.g- kubeadm join 172.31.6.165:6443 --token kl9fhu.co2n90v3rxtqllrs --discovery-token-ca-cert-hash sha256:b0f8003d23dbf445e0132a53d7aa1922bdef8d553d9eca06e65c928322b3e7c0
+
+GO TO MASTER AND RUN THIS COMMAND
+
+kubectl get nodes  ********END*********
+Mini kube installation 
+
+sudo su
+
+Now install docker
+
+sudo apt update && apt -y install docker.io
+
+install Kubectl
+
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl
+
+install Minikube
+
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+
+deployment pod with persistent volume.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pvdeploy
+spec:
+  replicas: 1
+  selector:  # tells the controller which pods to watch/belong to
+    matchLabels:
+     app: mypv
+  template:
+    metadata:
+      labels:
+        app: mypv
+    spec:
+      containers:
+      - name: shell
+        image: centos
+        command: ["bin/bash", "-c", "sleep 10000"]
+        volumeMounts:
+        - name: mypd
+          mountPath: "/tmp/persistent"
+      volumes:
+        - name: mypd
+          persistentVolumeClaim:
+            claimName: myebsvolclaim
+
+
+:wq!
+
+Configmap.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myvolconfig
+spec:
+  containers:
+  - name: c1
+    image: centos
+    command: ["/bin/bash", "-c", "while true; do echo PRINT;
+                             sleep 5 ; done"]
+    volumeMounts:
+      - name: testconfigmap
+        mountPath: "/tmp/config" # the config files will be mounted as ReadOnly  by default   here
+  volumes:
+  - name: testconfigmap
+    configMap:
+       name: mymap  # this should match the config map name created in the first step
+       items:
+       - key: sample.conf
+         path: sample.conf
+:wq!
+Configusedpod.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myenvconfig
+spec:
+  containers:
+  - name: c1
+    image: centos
+    command: ["/bin/bash", "-c", "while true; do echo Technical-Guftgu; sleep 5 ; done"]
+    env:
+    - name: MYENV                              # env name in which value of the key is stored
+      valueFrom:
+        configMapKeyRef:
+          name: mymap                      # name of the config created
+          key: sample.conf 
+:wq!   
+Namespace.yml
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: dev
+   labels:
+     name: dev
+:wq!
+pod in namespace.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+  namespace: dev
+  labels:
+    name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: nginx
+:wq!	
+
+$ kubectl config set-context $(kubectl config current-context) --namespace=dev
+$ kubectl config view | grep namespace:
+Resource quota pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resources
+spec:
+  containers:
+  - name: resource
+    image: centos
+    command: ["/bin/bash", "-c", "while true; do echo Technical-Guftgu; sleep 5 ; done"]
+    resources:                                          
+      requests:
+        memory: "64Mi"
+        cpu: "100m"
+      limits:
+        memory: "128Mi"
+        cpu: "200m"
+:wq!
+MEMDEFAULT.YML
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mem-min-max-demo-lr
+spec:
+  limits:
+  - max:
+      memory: 1Gi
+    min:
+      memory: 500Mi
+    type: Container
+:wq!
+
+Memory limit pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: constraints-mem-demo
+spec:
+  containers:
+  - name: constraints-mem-demo-ctr
+    image: nginx
+    resources:
+      limits:
+        memory: "800Mi"
+      requests:
+        memory: "600Mi"
+:wq!
+------------------
+- If request is not specified & limit is given, then request = limit
+-------------------
+$ wget -O metricserver.yml https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+Job container.yml
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: testjob
+spec:
+  template:
+    metadata:
+      name: testjob
+    spec:
+      containers:
+      - name: counter
+        image: centos:7
+        command: ["bin/bash", "-c", "echo Technical-Guftgu; sleep 5"]
+      restartPolicy: Never
+
+:wq!
+
+Job pod container.yml
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: testjob
+spec:
+  parallelism: 5                                     # Runs for pods in parallel
+  activeDeadlineSeconds: 10             # Timesout after 30 sec
+  template:
+    metadata:
+      name: testjob
+    spec:
+      containers:
+      - name: counter
+        image: centos:7
+        command: ["bin/bash", "-c", "echo PRINT; sleep 20"]
+      restartPolicy: Never
+:wq!
+
+Init container pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: initcontainer
+spec:
+  initContainers:
+  - name: c1
+    image: centos
+    command: ["/bin/sh", "-c", "echo PRINT > /tmp/xchange/testfile; sleep 30"]
+    volumeMounts:        
+      - name: xchange
+        mountPath: "/tmp/xchange"  
+  containers:
+  - name: c2
+    image: centos
+    command: ["/bin/bash", "-c", "while true; do echo `cat /tmp/data/testfile`; sleep 5; done"]
+    volumeMounts:
+      - name: xchange
+        mountPath: "/tmp/data"
+  volumes:                            
+  - name: xchange
+    emptyDir: {}
+
+:wq!
+In pening stage we can use (scale,events)
+
+
+>kubectl get pods --selector=name=nginx,type=frontend.
+
+>Kubectl get rc.           >Kubectl get rs.
+
+>Kubectl describe rs myrs.
+
+>Kubectl scale –replicas=5 rs myrs.
+
+>Kubectl delete rs/myrs.
+
+>Kubectl get deploy.
+
+>Kubectl get deploy mydeploy.
+
+>Kubectl scale –replicas=10 deploy mydep.
+
+>Kubectl exec pod1 –cat /etc/os-release.
+
+>Kubectl rollout status deploy mydeploy.
+
+>Kubectl rollout history deploy mydepoy.
+
+>Kubectl rollout undo deploy/mydeploy –to-revision=4.
+
+>Kubectl rollout undo deploy/mydeploy.
+
+>Kubectl rollout pause deploy mydeploy.
+
+>Kubectl rollout history deploy mydeploy - - revision=4.
+
+>Watch !!.
+
+>Watch kubectl get pods.
+
+>Kubectl version –short.
+
+>Kubectl get all.
+
+>Kubectl run pod1 --image nginx  --replicas=3.
+
+>Kubectl edit deployment.
+
+>Kubectl edit deployment mydeploy.
+
+>Kubectl create deployment web-server - - image=httpd.
+
+>Kubectl –h.    kubectl create –h.
+
+>Kubectl  get pods pod1 –o yaml.
+
+>Kubectl get deploy - -all-namespace –o yaml - -export.
+
+>Kubectl api-resources.
+
+>kubectl debug node/mynode -it  --image=ubuntu
+>kubectl exec --stdin --tty pod1  -- /bin/bash.
+
+# kgp –n kube-system –owide | grep  cloud-controller-manager
+
+# kgno –l node-role.kubernetes.io/control  -plane=
+
+# kdno (<node-name>sparrow-meta-ch-2- master-1-20022761
+
+# kdp  cloud-controller-manager-dz4h2 –n kube-system
+
+$ kdelp gb-varadhi-chronosq-cronjob- 27851760-ffmrk –n gb-group-manager- Playground
+
+$ kdelp –n monitoring metrics-server- 64bbd4db4-sl2xg promitheus-adapter- 55df7989fd-llbr5
+
+$ kdelp gb-varadhi-chronosq-cronjob- 27853000-7jrmz –n gb-group-manager- Playground
+
+$ kdelp griffin-crm-prod-newrelic-crm- 6dc95f4fb5-zwvgb griffin-prod-master- old-57b8cf87f-45dmk –n griffin- playground
+
+$ kgp –A –owide | grep containerCreating
+
+$ kepgh1
+
+# cat /var/lib/kubelet/conig.yml
+
+# k cordon <sparrow-…node-name>
+
+# k delete pod <cordons-…pname>
+
+# kgp –n kube-system | grep coredns
+
+# kgp –n kube-system –owide | grep  Coredns
+
+# k delete pod <coredns-…pname> -n  kube-system
+
+# kgp –n kube-system –owide | grep  Coredns
+
+# k uncoredns <sparrow-…node-name>
+
+# kgp –A | grep pending
+
+# less /ansible//roles/k8s-security  /tasks/alm-dev.yml
+# du –sh /var/log/* | grep G
+# apt-cache clean
+# apt-get clean
+#dh –h /var/log/kubelet/kubelet.log*
+# less <log_file>
+$less ~/.kube/prod-ch-3
+# systemctl status kubelet
+# systemctl restart kubelet
