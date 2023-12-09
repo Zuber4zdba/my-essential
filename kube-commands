@@ -356,6 +356,7 @@ spec:
 
 :wq!
 
+
 Pod treble shooting commands.
 
 >Kubectl describe pods $(pod1).

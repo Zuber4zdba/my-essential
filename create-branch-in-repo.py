@@ -19,23 +19,19 @@ def create_github_branch(token, owner, repo_name, base_branch, new_branch):
             "ref": f"refs/heads/{new_branch}",
             "sha": base_branch_sha
         }
-
         create_branch_response = requests.post(create_branch_url, headers=headers, json=data)
-
         if create_branch_response.status_code == 201:
             print(f"Branch '{new_branch}' created successfully.")
         else:
-            print(f"Failed to create branch. Status code: {create_branch_response.status_code}, "
-                  f"Message: {create_branch_response.json()['message']}")
+            print(f"Failed to create branch. Status code: {create_branch_response.status_code}," f"Message: {create_branch_response.json()['message']}")
     else:
-        print(f"Failed to get base branch information. Status code: {response.status_code}, "
-              f"Message: {response.json()['message']}")
+        print(f"Failed to get base branch information. Status code: {response.status_code}," f"Message: {response.json()['message']}")
 
 # Replace 'YOUR_GITHUB_TOKEN', 'OWNER', 'REPO_NAME', 'BASE_BRANCH', and 'NEW_BRANCH' with your actual values
-token = "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"
+token = "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"
 owner = "Zuber4zdba"
 repo_name = "my-essential"
-base_branch = "main"
-new_branch = "dev"
+base_branch = "master"
+new_branch = "hotfix"
 
 create_github_branch(token, owner, repo_name, base_branch, new_branch)
