@@ -19,7 +19,7 @@ def get_merged_branches(token, owner, repo_name):
         return None
 
 # Replace 'YOUR_GITHUB_TOKEN', 'OWNER', and 'REPO_NAME' with your actual values
-token = "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"
+token = "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"
 owner = "zuber4zdba"
 repo_name = "my-essential"
 

@@ -20,7 +20,7 @@ def get_github_branches(token, repo_owner, repo_name):
         return None
 
 # Replace 'YOUR_GITHUB_TOKEN', 'OWNER', and 'REPO_NAME' with your actual values
-token = "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"
+token = "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"
 owner = "Zuber4zdba"
 repo_name = "my-essential"
 
